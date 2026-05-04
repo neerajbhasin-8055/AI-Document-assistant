@@ -2,10 +2,11 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const pdfParse = require('pdf-parse/lib/pdf-parse'); 
+const cors = require('cors');  
 
 const app = express();
 const port = 3000;
-
+app.use(cors())
 app.use(express.json())// converts incoming JSON to JavaScript Object
 
 const upload = multer({ dest: 'uploads/' })
