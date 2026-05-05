@@ -1,1 +1,120 @@
-<p>resume-analyzer works!</p>
+<div class="min-h-screen bg-gray-50 p-4 md:p-8 lg:p-12">
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- Header Section -->
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Resume Smart-Scan</h2>
+            <p class="text-gray-500 mt-2">Upload your resume to check for ATS compatibility and skill gaps.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT: Upload Zone (5 columns) -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="p-6 bg-white rounded-3xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Analyze Resume</h3>
+                    
+                    <!-- Drag & Drop Box -->
+                    <div class="relative group">
+                        <div class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-blue-100 rounded-2xl bg-blue-50/30 group-hover:bg-blue-50 transition-all cursor-pointer">
+                            <svg class="w-10 h-10 mb-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-xs text-gray-500 font-medium">{{ file ? file : 'Click or drop PDF Resume' }}</p>
+                            <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" (change)="onFileSelected($event)" accept=".pdf" />
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button (click)="upload()" [disabled]="isAnalyzing || !file"
+                        class="w-full mt-6 py-3 px-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-black active:scale-[0.98] transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg shadow-gray-200">
+                        <span *ngIf="!isAnalyzing">Run Analysis</span>
+                        <span *ngIf="isAnalyzing" class="flex items-center justify-center gap-2">
+                            Scanning...
+                            <span class="flex gap-1">
+                                <span class="w-1 h-1 bg-white rounded-full animate-bounce"></span>
+                                <span class="w-1 h-1 bg-white rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                                <span class="w-1 h-1 bg-white rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                            </span>
+                        </span>
+                    </button>
+
+                    <p class="mt-3 text-center text-xs font-semibold" [ngClass]="analysisResults ? 'text-green-600' : 'text-blue-500'">
+                        {{ message }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- RIGHT: Analysis Results (7 columns) -->
+            <div class="lg:col-span-7">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 min-h-[300px] overflow-hidden">
+                    
+                    <!-- Empty State -->
+                    <div *ngIf="!analysisResults && !isAnalyzing" class="h-full flex flex-col items-center justify-center p-12 text-center">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-gray-400 font-medium text-sm">No analysis performed yet.</h4>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div *ngIf="isAnalyzing" class="p-8 space-y-6">
+                        <div class="h-4 bg-gray-100 rounded-full w-1/3 animate-pulse"></div>
+                        <div class="flex gap-2">
+                            <div class="h-8 bg-gray-100 rounded-lg w-20 animate-pulse"></div>
+                            <div class="h-8 bg-gray-100 rounded-lg w-24 animate-pulse"></div>
+                            <div class="h-8 bg-gray-100 rounded-lg w-16 animate-pulse"></div>
+                        </div>
+                        <div class="h-20 bg-gray-50 rounded-2xl animate-pulse"></div>
+                    </div>
+
+                    <!-- Results Content -->
+                    <div *ngIf="analysisResults" class="p-8 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                        
+                        <!-- Skills Section -->
+                        <div>
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Detected Skills</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span *ngFor="let skill of analysisResults.skills" 
+                                      class="px-3 py-1.5 bg-green-50 text-green-700 border border-green-100 rounded-lg text-xs font-bold">
+                                    {{ skill | uppercase }}
+                                </span>
+                                <p *ngIf="analysisResults.skills.length === 0" class="text-xs text-gray-400 italic">No matching keywords found.</p>
+                            </div>
+                        </div>
+
+                        <!-- Missing Sections -->
+                        <div>
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Critical Missing Sections</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div *ngFor="let section of analysisResults.missing" 
+                                     class="flex items-center gap-2 p-3 bg-red-50/50 border border-red-50 rounded-xl">
+                                    <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-xs font-semibold text-red-700">{{ section | titlecase }}</span>
+                                </div>
+                            </div>
+                            <p *ngIf="analysisResults.missing.length === 0" class="text-xs text-green-600 font-bold">✓ All required sections are present!</p>
+                        </div>
+
+                        <!-- Suggestions -->
+                        <div class="bg-blue-600 rounded-2xl p-5 text-white shadow-xl shadow-blue-100">
+                            <div class="flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <h4 class="text-xs font-black uppercase tracking-widest">Pro Tip</h4>
+                            </div>
+                            <p class="text-xs leading-relaxed opacity-90">{{ analysisResults.suggestion }}</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

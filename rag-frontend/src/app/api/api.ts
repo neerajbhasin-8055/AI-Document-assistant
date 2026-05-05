@@ -17,4 +17,10 @@ export class ApiService{
   askQuestion(question:string){
     return this.http.post(`${this.baseUrl}/ask`,{question})
   }
+
+  uploadResume(file:File){
+    const formData = new FormData();
+    formData.append('pdf',file)
+    return this.http.post(`${this.baseUrl}/analyse-resume`,formData)
+  }
 }
