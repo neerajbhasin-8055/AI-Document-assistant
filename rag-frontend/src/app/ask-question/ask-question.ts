@@ -1,7 +1,13 @@
-import { Component, ChangeDetectorRef } from '@angular/core'; // 1. Added ChangeDetectorRef
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { ApiService } from '../api/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+interface Message {
+  text: string;
+  sender: 'user' | 'ai';
+  timestamp: Date;
+}
 
 @Component({
   standalone: true,
@@ -12,41 +18,65 @@ import { FormsModule } from '@angular/forms';
 })
 export class AskQuestion {
   question: string = '';
-  answer: string = '';
+  messages: Message[] = []; // Array to hold the chat history
   isFetching: boolean = false;
 
-  // 2. Inject ChangeDetectorRef into the constructor
   constructor(
     private api: ApiService,
     private cdr: ChangeDetectorRef 
   ) {}
 
   ask() {
-    if (!this.question.trim()) {
-      this.answer = "Please ask a question";
-      return;
-    }
+    if (!this.question.trim()) return;
 
+    // 1. Add User Message to the chat
+    const userMsg: Message = {
+      text: this.question,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    this.messages.push(userMsg);
+
+    console.log("messages: ",this.messages)
+    const currentQuestion = this.question; // Store it for the API call
+    this.question = ''; // Clear the input box
     this.isFetching = true;
-    this.answer = '';
+    this.cdr.detectChanges();
 
-    this.api.askQuestion(this.question).subscribe({
+    // 2. Fetch AI Response
+    this.api.askQuestion(currentQuestion).subscribe({
       next: (res: any) => {
-        // 3. Update the data
-        this.answer = res.answer;
+        const aiMsg: Message = {
+          text: res.answer,
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        this.messages.push(aiMsg);
         this.isFetching = false;
-
-        // 4. Trigger UI Refresh
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
+        this.scrollToBottom();
       },
       error: (err) => {
-        console.error("AI Assistant Error:", err);
-        this.answer = "Error getting answer. Please try again.";
+        const errMsg: Message = {
+          text: "Sorry, I encountered an error. Please try again.",
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        this.messages.push(errMsg);
         this.isFetching = false;
-
-        // Trigger UI Refresh on error as well
         this.cdr.detectChanges();
       }
     });
   }
+
+  // Helper to scroll to the latest message
+  private scrollToBottom() {
+    setTimeout(() => {
+      const chatContainer = document.getElementById('chat-container');
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }, 100);
+  }
+  
 }

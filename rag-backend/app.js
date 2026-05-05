@@ -140,7 +140,6 @@ app.post('/ask', (req, res) => {
         .replace(/[^\w\s]/g, "") // removes punctuation
         .split(" ").filter(word => word && !stopWords.includes(word)) // keeps only valid word
 
-    
         const scoredChunks = documentChunks.map(chunk=>{
             let score = 0;
             words.forEach(word=>{

@@ -1,16 +1,11 @@
 import { Component,signal} from '@angular/core';
-import {PdfUpload} from './pdf-upload/pdf-upload'
-import{AskQuestion} from './ask-question/ask-question'
-import { ResumeAnalyzer } from './resume-analyzer/resume-analyzer';
-import { Navbar } from './navbar/navbar';
 
+import { RouterOutlet,RouterModule } from '@angular/router';
+import { Navbar } from './navbar/navbar';
 @Component({
   selector: 'app-root',
   imports: [
-    PdfUpload,
-    AskQuestion,
-    ResumeAnalyzer,
-    Navbar
+    RouterOutlet,RouterModule,Navbar
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'

@@ -1,53 +1,76 @@
-<div class="flex flex-col items-center justify-center p-6 bg-gray-50 min-h-[300px]">
-  <div class="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
+<div class="flex flex-col h-full bg-white">
+  
+  <!-- Chat Header -->
+  <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+    <div class="flex items-center gap-2">
+      <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+      <h3 class="font-bold text-gray-800 text-sm">DocuSmart Chat</h3>
+    </div>
+    <span class="text-[10px] text-gray-400 font-mono">RAG ENGINE ACTIVE</span>
+  </div>
 
-    <!-- Header -->
-    <div class="mb-6 text-center">
-      <h3 class="text-xl font-bold text-gray-800 flex items-center justify-center gap-2">
-        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
-          </path>
+  <!-- Messages List -->
+  <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 custom-scrollbar">
+    
+    <!-- Empty State -->
+    <div *ngIf="messages.length === 0" class="h-full flex flex-col items-center justify-center text-center p-6">
+      <div class="bg-blue-100 p-4 rounded-full mb-3">
+        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
         </svg>
-        Ask Assistant
-      </h3>
-      <p class="text-xs text-gray-500 uppercase tracking-widest font-semibold mt-1">AI Document Expert</p>
+      </div>
+      <p class="text-gray-800 font-bold text-sm">No questions yet</p>
+      <p class="text-xs text-gray-500 mt-1">Ask anything about the uploaded PDF.</p>
     </div>
 
-    <!-- Input Section -->
-    <div class="space-y-4">
-      <div class="relative">
-        <input type="text" [(ngModel)]="question" placeholder="What is this PDF about?"
-          class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm focus:bg-white focus:border-blue-500 focus:ring-0 transition-all outline-none text-gray-800 placeholder-gray-400">
+    <!-- Chat Bubbles -->
+    <div *ngFor="let msg of messages" 
+         [ngClass]="{'flex-row-reverse': msg.sender === 'user'}" 
+         class="flex items-start gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      
+      <!-- Avatar -->
+      <div [ngClass]="msg.sender === 'user' ? 'bg-blue-600' : 'bg-gray-800'" 
+           class="w-7 h-7 rounded-full flex items-center justify-center text-[9px] text-white font-bold shrink-0 shadow-sm">
+        {{ msg.sender === 'user' ? 'YOU' : 'AI' }}
       </div>
 
-      <!-- Action Button -->
-      <button (click)="ask()" [disabled]="isFetching"
-        class="w-full cursor-pointer py-3.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-100 disabled:bg-blue-400 disabled:cursor-not-allowed">
-
-        <span *ngIf="!isFetching">Ask Question</span>
-
-        <!-- Loading State -->
-        <span *ngIf="isFetching" class="flex items-center justify-center gap-1">
-          Fetching information
-          <span class="flex gap-0.5">
-            <span class="animate-pulse">.</span>
-            <span class="animate-pulse [animation-delay:0.2s]">.</span>
-            <span class="animate-pulse [animation-delay:0.4s]">.</span>
-          </span>
+      <!-- Bubble -->
+      <div [ngClass]="msg.sender === 'user' ? 'bg-blue-600 text-white rounded-l-xl rounded-tr-xl shadow-blue-100' : 'bg-white text-gray-800 border border-gray-200 rounded-r-xl rounded-tl-xl shadow-sm'" 
+           class="max-w-[85%] p-3 shadow-md">
+        <p class="text-xs leading-relaxed whitespace-pre-line">{{ msg.text }}</p>
+        <span [ngClass]="msg.sender === 'user' ? 'text-blue-200' : 'text-gray-400'" 
+              class="text-[8px] block mt-1 uppercase font-medium">
+          {{ msg.timestamp | date:'shortTime' }}
         </span>
-      </button>
+      </div>
     </div>
 
-    <div class="mt-6 animate-in fade-in slide-in-from-top-2 duration-500">
-      <h4 class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 ml-2">Answer</h4>
-
-      <!-- This is the scrollable container -->
-      <div class="max-h-48 overflow-y-auto p-4 bg-blue-50 border border-blue-100 rounded-xl custom-scrollbar">
-        <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
-          {{ answer }}
-        </p>
+    <!-- AI Typing Indicator -->
+    <div *ngIf="isFetching" class="flex items-start gap-2.5">
+      <div class="bg-gray-800 w-7 h-7 rounded-full flex items-center justify-center text-[9px] text-white font-bold shrink-0">AI</div>
+      <div class="bg-white border border-gray-200 p-3 rounded-r-xl rounded-tl-xl shadow-sm">
+        <div class="flex gap-1">
+          <div class="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
+          <div class="w-1 h-1 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+          <div class="w-1 h-1 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+        </div>
       </div>
-
     </div>
   </div>
+
+  <!-- Input Area -->
+  <div class="p-4 bg-white border-t border-gray-100">
+    <div class="relative flex items-center">
+      <input type="text" [(ngModel)]="question" (keyup.enter)="ask()"
+        placeholder="Type your question..."
+        class="w-full p-3.5 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:border-blue-500 transition-all outline-none">
+      
+      <button (click)="ask()" [disabled]="isFetching || !question.trim()"
+        class="absolute right-1.5 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 transition-all shadow-md">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
