@@ -27,19 +27,32 @@ let chunkText = (text,chunkSize = 250)=>{
 }
 
 
-let formatAnswer = (chunks,question)=>{
-    let answer = "Based on this document.\n\n" 
-    answer += chunks[0].slice(0,300)+"\n\n" 
-    if(chunks.length > 1){
-        answer += "Key points:\n"
-        chunks.slice(1).forEach(chunk=>{
-            answer+="•" + chunk.slice(0,150)+"...\n"
-        })
+let formatAnswer = (chunks, question) => {
+    let answer = "Based on this document.\n\n";
+    answer += chunks[0].slice(0, 300) + "\n\n";
+    
+    if (chunks.length > 1) {
+        answer += "Key points:\n";
+        chunks.slice(1).forEach(chunk => {
+            // 1. Remove extra spaces or newlines from the start/end
+            let cleanChunk = chunk.trim();
+            
+            // 2. Check if it already starts with a bullet (•), dash (-), or asterisk (*)
+            const hasBullet = /^[-•*]/.test(cleanChunk);
+            
+            if (hasBullet) {
+                // If it has one, just add a space if needed and use it
+                answer += cleanChunk.slice(0, 150) + "...\n";
+            } else {
+                // If it doesn't have one, add your bullet
+                answer += "• " + cleanChunk.slice(0, 150) + "...\n";
+            }
+        });
     }
-    answer += "\n Conclusion: This information is derived from the uploaded document."
-    return answer
-}
-
+    
+    answer += "\nConclusion: This information is derived from the uploaded document.";
+    return answer;
+};
 
 // routes
 app.post('/upload-pdf', upload.single('pdf'), async (req, res) => {
