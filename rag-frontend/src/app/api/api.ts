@@ -12,8 +12,9 @@ export class ApiService{
   uploadPdf(file:File){
     const formData = new FormData();
     formData.append('pdf',file);
-    
     return this.http.post(`${this.baseUrl}/upload-pdf`,formData)
   }
-
+  askQuestion(question:string){
+    return this.http.post(`${this.baseUrl}/ask`,{question})
+  }
 }
