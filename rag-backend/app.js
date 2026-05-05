@@ -151,6 +151,9 @@ app.post('/ask', (req, res) => {
             return {chunk,score}
         })
 
+
+
+
     const sorted = scoredChunks
     .filter(item => item.score>0)
     .sort((a,b)=>b.score - a.score)
@@ -160,7 +163,7 @@ app.post('/ask', (req, res) => {
     }
 
     const topChunks = sorted.slice(0,3).map(item=>item.chunk)
-
+    console.log(topChunks)
     const finalAnswer = formatAnswer(topChunks,question)
     console.log(finalAnswer)
     res.json({
