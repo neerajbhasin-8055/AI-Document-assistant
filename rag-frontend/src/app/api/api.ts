@@ -23,4 +23,16 @@ export class ApiService{
     formData.append('pdf',file)
     return this.http.post(`${this.baseUrl}/analyse-resume`,formData)
   }
+
+  uploadJd(files: File[]) {
+  const formData = new FormData();
+  
+  // We must use 'pdfs' because that's what your backend's 
+  // upload.array('pdfs', 2) is looking for.
+  files.forEach(file => {
+    formData.append('pdfs', file, file.name);
+  });
+
+  return this.http.post('http://localhost:3000/analyze-JD', formData);
+}
 }

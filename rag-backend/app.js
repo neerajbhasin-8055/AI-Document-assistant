@@ -154,8 +154,18 @@ app.post('/analyze-JD', upload.array('pdfs', 2), async (req, res) => {
         ]);
 
         // Normalize text once
-        const resumeText = resumeParser.text.toLowerCase();
-        const jdText = jdParser.text.toLowerCase();
+
+
+
+        const resumeText = resumeParser.text ? resumeParser.text.toLowerCase() : "";
+        const jdText = jdParser.text ? jdParser.text.toLowerCase() : "";
+
+        // Add a check to ensure we actually got text
+        if (!resumeText || !jdText) {
+            return res.status(422).json({
+                error: "Could not extract text from one or both PDFs. Please ensure they are not scanned images."
+            });
+        }
 
         const masterSkills = ['java', 'python', 'javascript', 'angular', 'react', 'node', 'spring boot', 'aws', 'sql', 'mongodb', 'kafka', 'docker', 'kubernetes'];
 
@@ -170,8 +180,8 @@ app.post('/analyze-JD', upload.array('pdfs', 2), async (req, res) => {
         const missingSkills = jdSkills.filter(skill => !resumeSkills.includes(skill));
 
         // 4. Scoring
-        let matchScore = jdSkills.length > 0 
-            ? Math.round((matchedSkills.length / jdSkills.length) * 100) 
+        let matchScore = jdSkills.length > 0
+            ? Math.round((matchedSkills.length / jdSkills.length) * 100)
             : 0;
 
         // 5. Response

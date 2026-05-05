@@ -12,6 +12,7 @@ export class ResumeAnalyzer {
   file: File | null = null;
   message: string = '';
   isAnalyzing: boolean = false;
+  fileName: string = '';
   
   // Results object to store parsed data
   analysisResults: any = null;
@@ -25,6 +26,7 @@ export class ResumeAnalyzer {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       this.file = selectedFile;
+      this.fileName = selectedFile.name;
       this.message = "";
       this.analysisResults = null; // Clear old results
     }

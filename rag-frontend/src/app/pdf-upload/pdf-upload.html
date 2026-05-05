@@ -5,30 +5,43 @@
         <!-- LEFT SIDEBAR: Upload & Summary (Now 40% width) -->
         <div class="w-full lg:w-2/5 space-y-6">
 
-            <!-- 1. Upload Card -->
+            <!-- 1. Upload Card (UPDATED TO BE DYNAMIC) -->
             <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-gray-800">Upload PDF</h3>
                 </div>
                 <div class="relative group">
                     <div
-                        class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 group-hover:bg-blue-50 transition-all">
-                        <svg class="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition-all cursor-pointer"
+                        [ngClass]="file ? 'border-green-200 bg-green-50/50' : 'border-gray-200 bg-gray-50 group-hover:bg-blue-50'">
+                        
+                        <!-- Dynamic Icon -->
+                        <svg *ngIf="!file" class="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
                             </path>
                         </svg>
-                        <p class="text-xs text-gray-500 font-medium">Click or drag PDF</p>
+                        
+                        <svg *ngIf="file" class="w-8 h-8 mb-2 text-green-500 animate-in zoom-in duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+
+                        <!-- Dynamic Text -->
+                        <p class="text-xs font-medium px-4 text-center" [ngClass]="file ? 'text-green-700' : 'text-gray-500'">
+                            {{ file ? fileName : 'Click or drag PDF' }}
+                        </p>
+
                         <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             (change)="onFileSelected($event)" accept=".pdf" />
                     </div>
                 </div>
+
                 <!-- Action Button with Loading State -->
-                <button (click)="upload()" [disabled]="isUploading"
+                <button (click)="upload()" [disabled]="isUploading || !file"
                     class="cursor-pointer w-full mt-4 px-4 py-2.5 text-white font-semibold bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md text-sm disabled:bg-blue-400 disabled:cursor-not-allowed">
 
                     <!-- Default Text -->
-                    <span *ngIf="!isUploading">Upload</span>
+                    <span *ngIf="!isUploading">{{ file ? 'Analyze Resume' : 'Select PDF' }}</span>
 
                     <!-- Blinking Loading State -->
                     <span *ngIf="isUploading" class="flex items-center justify-center gap-1">
@@ -39,13 +52,11 @@
                             <span class="animate-pulse [animation-delay:0.4s]">.</span>
                         </span>
                     </span>
-
-
                 </button>
                 <p class="mt-2 text-center text-xs font-medium text-blue-600">{{message}}</p>
             </div>
 
-            <!-- 2. Summary Card -->
+            <!-- 2. Summary Card (Kept Same) -->
             <div class="p-6 bg-white rounded-2xl shadow-sm border border-blue-50 h-fit min-h-[150px]">
                 <div class="flex items-center mb-4">
                     <div class="bg-blue-600 p-1.5 rounded-lg mr-3">
@@ -59,7 +70,6 @@
                 </div>
 
                 <div class="space-y-4">
-                    <!-- LOADING STATE for Summary -->
                     <div *ngIf="isSummarizing" class="space-y-3 animate-pulse">
                         <div class="h-2 bg-gray-200 rounded-full w-3/4"></div>
                         <div class="h-2 bg-gray-200 rounded-full"></div>
@@ -67,13 +77,11 @@
                         <p class="text-[10px] text-blue-500 font-bold italic">AI is generating insights...</p>
                     </div>
 
-                    <!-- ACTUAL SUMMARY CONTENT -->
                     <div *ngIf="!isSummarizing && summary"
                         class="p-3 bg-gray-50 rounded-xl border border-gray-100 italic text-xs text-gray-600 leading-relaxed animate-in fade-in duration-700">
                         <p class="whitespace-pre-line">{{ summary }}</p>
                     </div>
 
-                    <!-- EMPTY STATE -->
                     <div *ngIf="!isSummarizing && !summary" class="text-center py-4">
                         <p class="text-[10px] text-gray-400">Upload a PDF to see the summary here.</p>
                     </div>
@@ -82,9 +90,8 @@
 
         </div>
 
-        <!-- RIGHT SIDE: Chat Workspace (Now 60% width and more contained) -->
+        <!-- RIGHT SIDE: Chat Workspace (Kept Same) -->
         <div class="w-full lg:w-3/5">
-            <!-- Added max-width to keep the chat from stretching too far on wide monitors -->
             <div
                 class="bg-white rounded-3xl shadow-xl border border-gray-100 h-[calc(100vh-160px)] max-w-2xl mx-auto flex flex-col overflow-hidden">
                 <app-ask-question class="h-full"></app-ask-question>
